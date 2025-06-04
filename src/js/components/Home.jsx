@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //create your first component
 const Home = () => {
@@ -13,16 +13,75 @@ const Home = () => {
 		setTexto("")
 	}
 	const eliminarTareas = (tareaEliminar) => {
-		setTareas(tareas.filter((tarea, index) => index !== tareaEliminar)) 
+		borrarTareas(tareaEliminar)
+		
 	}
 	const teclaEnter = (e) => {
 		if(e.key === "Enter") {
-			setTareas([...tareas, texto])
 			setTexto("")
+			crearTareas()
 		}
 	}
 
+	const obtenerTareas = () => {
+		fetch('https://playground.4geeks.com/todo/users/pedro', {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+			.then(resp => {
+				return resp.json(); // Intentará parsear el resultado a JSON y retornará una promesa donde puedes usar .then para seguir con la lógica
+			})
+			.then(data => {
+				setTareas(data.todos)
+			})
+			.catch(error => {
+				// Manejo de errores
+				console.log(error);
+			});
+	}
 
+const crearTareas = () => {
+	fetch('https://playground.4geeks.com/todo/todos/pedro', {
+      method: "POST",
+      body: JSON.stringify({label: texto, is_done: false}),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(resp => {
+        return resp.json(); // Intentará parsear el resultado a JSON y retornará una promesa donde puedes usar .then para seguir con la lógica
+    })
+    .then(data => {
+        setTareas([...tareas, data])
+        console.log(data); // Esto imprimirá en la consola el objeto exacto recibido del servidor
+    })
+    .catch(error => {
+        // Manejo de errores
+        console.log(error);
+    });
+}
+
+const borrarTareas = (id) => {
+	fetch('https://playground.4geeks.com/todo/todos/' +id, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(resp => {
+		setTareas(tareas.filter((tarea) => tarea.id !== tareaEliminar)) 
+    })
+    .catch(error => {
+        // Manejo de errores
+        console.log(error);
+    });
+}
+
+	useEffect(() => {
+		obtenerTareas()
+	},[])
 
 	return (
 		<>
@@ -39,11 +98,11 @@ const Home = () => {
           <p style={{ margin: 10 }}>No hay tareas</p>
         )}
 		<ul>
-			{tareas.map((tarea, index) => (
+			{tareas.map((tarea) => (
 				<li 
 				style={{backgroundColor:"#58d68d"}} 
-				key={index}>{tarea}
-				<button onClick={()=> eliminarTareas(index)} 
+				key={tarea.id}>{tarea.label}
+				<button onClick={()=> eliminarTareas(tarea.id)} 
 				type="button" 
 				className="btn btn-outline-dark btn-sm"
 				style= {{marginLeft:20}}>✕</button>
