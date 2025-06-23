@@ -71,7 +71,7 @@ const borrarTareas = (id) => {
       }
     })
     .then(resp => {
-		setTareas(tareas.filter((tarea) => tarea.id !== tareaEliminar)) 
+		setTareas(tareas.filter((tarea) => tarea.id !== id)) 
     })
     .catch(error => {
         // Manejo de errores
@@ -112,7 +112,9 @@ const borrarTareas = (id) => {
 
 			)}
 		</ul>
-
+			<p>
+				{tareas.length} tareas
+			</p>
 		</div>
 		</>
 	);
